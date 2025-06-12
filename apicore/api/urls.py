@@ -8,6 +8,6 @@ urlpatterns = [
     path('v1/category/<int:pk>', views.CategoryApiUpdate.as_view(), name='category_update'),
     path('v1/auth/', include('djoser.urls')),
     re_path(r'^auth/', include('djoser.urls.authtoken')),
-    path('auth/telegram/', views.TelegramAuthView.as_view(), name="telegram_auth"),
+    path('auth/telegram', views.TelegramAuthView.as_view(), name="telegram_auth"),
 
 ]
