@@ -10,14 +10,15 @@ import hashlib
 import json
 from urllib.parse import parse_qsl, unquote
 from decouple import config
-from django.contrib.auth import get_user_model
 from .models import *
 from .serializer import *
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
+from django.contrib.auth.models import User
+from rest_framework.permissions import AllowAny
+
 BOT_TOKEN = config('TG_BOT_TOKEN')
-User = get_user_model()
 
 class PostApiList(generics.ListCreateAPIView):
     queryset = Post.objects.all()
@@ -39,10 +40,27 @@ class CategoryApiUpdate(generics.UpdateAPIView):
 @method_decorator(csrf_exempt, name='dispatch')
 class TelegramAuthView(APIView):
     authentication_classes = []
-    permission_classes = [AllowAny]  # Явно указываем AllowAny
+    permission_classes = [AllowAny]
+    
+    def dispatch(self, request, *args, **kwargs):
+        # Добавляем CORS заголовки ко всем ответам
+        response = super().dispatch(request, *args, **kwargs)
+        response["Access-Control-Allow-Origin"] = "*"
+        response["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        response["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        return response
+    
+    def options(self, request, *args, **kwargs):
+        """Обработка preflight запросов для CORS"""
+        return HttpResponse(status=200)
     
     def post(self, request):
         try:
+            # Логирование для отладки
+            print(f"Request method: {request.method}")
+            print(f"Request headers: {dict(request.headers)}")
+            print(f"Request data: {request.data}")
+            
             init_data = request.data.get("initData", "")
             if not init_data:
                 return Response({
@@ -125,6 +143,7 @@ class TelegramAuthView(APIView):
             }, status=200)
             
         except Exception as e:
+            print(f"Error in TelegramAuthView: {str(e)}")
             return Response({
                 "auth": False, 
                 "token": "", 

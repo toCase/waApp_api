@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'apicore.middleware.CorsMiddleware',
     'corsheaders.middleware.CorsMiddleware', # CORS FOR TEST
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -127,11 +128,16 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Настройки безопасности
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
+SECURE_REFERRER_POLICY = None
+
 # CSRF настройки для API
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:30000",
     "http://127.0.0.1:30000",
-    "https://t78481548vc14789.pp.ua",  # замените на ваш домен
+    "https://t78481548vc14789.pp.ua",
+    "https://tocase.github.io/waApp/",# замените на ваш домен
 ]
 
 # Исключения для CSRF (только для API эндпоинтов)
@@ -143,7 +149,6 @@ CSRF_EXEMPT_URLS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
@@ -161,17 +166,21 @@ REST_FRAMEWORK = {
 
 
 
+
+
 # CORS FOR TEST
 
 if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True
+    
     CORS_ALLOWED_ORIGINS = [
         "http://localhost:30000",
+        "https://tocase.github.io/waApp/",
     ]
     SECURE_SSL_REDIRECT = False
     SECURE_BROWSER_XSS_FILTER = False
 
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -183,6 +192,9 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'access-control-allow-origin',
+    'access-control-allow-methods',
+    'access-control-allow-headers',
 ]
 
 CORS_ALLOW_METHODS = [
