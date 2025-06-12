@@ -1,4 +1,5 @@
-from email.policy import default
+import os
+# from email.policy import default
 from pathlib import Path
 from decouple import config
 
@@ -13,7 +14,15 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
+else:
+    ALLOWED_HOSTS = [
+        "http://t78481548vc14789.pp.ua",
+        "https://t78481548vc14789.pp.ua",
+        "localhost",
+        "127.0.0.1"
+        ]
 
 
 # Application definition
@@ -110,7 +119,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -134,11 +144,14 @@ REST_FRAMEWORK = {
 }
 
 
+
 # CORS FOR TEST
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:30000",
-]
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:30000",
+    ]
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -164,3 +177,25 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+
+# Логирование для отладки
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}

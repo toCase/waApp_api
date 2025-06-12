@@ -11,4 +11,10 @@ services:
       - .env
     volumes:
       - .:/app
-    working_dir: /app/apicore
+      - staticfiles:/app/staticfiles
+    environment:
+      - DEBUG=True
+      - DJANGO_SETTINGS_MODULE=apicore.settings
+
+volumes:
+  staticfiles:
