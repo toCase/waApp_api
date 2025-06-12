@@ -45,9 +45,21 @@ class TelegramAuthView(APIView):
     def dispatch(self, request, *args, **kwargs):
         # Добавляем CORS заголовки ко всем ответам
         response = super().dispatch(request, *args, **kwargs)
-        response["Access-Control-Allow-Origin"] = "*"
+        
+        origin = request.META.get('HTTP_ORIGIN')
+        allowed_origins = [
+            'https://tocase.github.io',
+            'https://t78481548vc14789.pp.ua',
+            'http://localhost:30000',
+            'http://127.0.0.1:30000',
+        ]
+        
+        if origin in allowed_origins or not origin:
+            response["Access-Control-Allow-Origin"] = origin or "*"
         response["Access-Control-Allow-Methods"] = "POST, OPTIONS"
-        response["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-CSRFToken"
+        response["Access-Control-Allow-Credentials"] = "true"
+        
         return response
     
     def options(self, request, *args, **kwargs):

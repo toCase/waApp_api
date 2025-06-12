@@ -137,7 +137,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:30000",
     "http://127.0.0.1:30000",
     "https://t78481548vc14789.pp.ua",
-    "https://tocase.github.io/waApp/",# замените на ваш домен
+    "https://tocase.github.io",# замените на ваш домен
 ]
 
 # Исключения для CSRF (только для API эндпоинтов)
@@ -171,16 +171,18 @@ REST_FRAMEWORK = {
 # CORS FOR TEST
 
 if DEBUG:
-    
-    CORS_ALLOWED_ORIGINS = [
-        "http://localhost:30000",
-        "https://tocase.github.io/waApp/",
-    ]
     SECURE_SSL_REDIRECT = False
     SECURE_BROWSER_XSS_FILTER = False
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "https://tocase.github.io",  # Ваш GitHub Pages домен
+    "https://t78481548vc14789.pp.ua",
+    "http://localhost:30000",
+    "http://127.0.0.1:30000",
+]
 
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -206,7 +208,7 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
-# Логирование для отладки
+# Логирование для отладки CORS
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -223,6 +225,11 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
             'level': 'INFO',
+            'propagate': False,
+        },
+        'corsheaders': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
             'propagate': False,
         },
     },
