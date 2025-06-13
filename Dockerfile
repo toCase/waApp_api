@@ -24,4 +24,4 @@ RUN python manage.py collectstatic --noinput || true
 EXPOSE 8000
 
 # Исправленная команда для запуска gunicorn
-CMD ["gunicorn", "apicore.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+CMD ["gunicorn", "apicore.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--access-logfile", "-", "--error-logfile", "-", "--log-level", "debug"]

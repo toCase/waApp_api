@@ -42,7 +42,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'apicore.middleware.CorsMiddleware',
     'corsheaders.middleware.CorsMiddleware', # CORS FOR TEST
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
