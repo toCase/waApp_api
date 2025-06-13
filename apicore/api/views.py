@@ -75,7 +75,8 @@ class TelegramAuthView(APIView):
                 }, status=500)
             
             # Проверяем подпись
-            check_string = "\n".join(f"{k}={v}" for k, v in sorted(data_dict.items()))
+            check_string = "\n".join([f"{k}={v}" for k, v in sorted(data_dict.items())])
+            print(f"Check string for hash: {repr(check_string)}")
             secret_key = hashlib.sha256(settings.BOT_TOKEN.encode()).digest()
             hmac_hash = hmac.new(secret_key, check_string.encode(), hashlib.sha256).hexdigest()
             
