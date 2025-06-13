@@ -58,6 +58,7 @@ class TelegramAuthView(APIView):
             # Парсим данные от Telegram
             data_dict = dict(parse_qsl(init_data, keep_blank_values=True))
             hash_from_telegram = data_dict.pop("hash", None)
+            data_dict.pop("signature", None)
             
             if not hash_from_telegram:
                 return Response({
