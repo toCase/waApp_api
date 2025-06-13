@@ -9,7 +9,7 @@ import hmac
 import hashlib
 import json
 from urllib.parse import parse_qsl, unquote
-from decouple import config
+from django.conf import settings
 from .models import *
 from .serializer import *
 from django.views.decorators.csrf import csrf_exempt
@@ -17,8 +17,6 @@ from django.utils.decorators import method_decorator
 
 from django.contrib.auth.models import User
 from rest_framework.permissions import AllowAny
-
-BOT_TOKEN = config('TG_BOT_TOKEN')
 
 class PostApiList(generics.ListCreateAPIView):
     queryset = Post.objects.all()
@@ -68,12 +66,22 @@ class TelegramAuthView(APIView):
                     "error": "hash is missing"
                 }, status=400)
             
+            # ИСПРАВЛЕНО: Используем BOT_TOKEN из settings
+            if not hasattr(settings, 'BOT_TOKEN'):
+                return Response({
+                    "auth": False, 
+                    "token": "", 
+                    "error": "BOT_TOKEN not configured on server"
+                }, status=500)
+            
             # Проверяем подпись
             check_string = "\n".join(f"{k}={v}" for k, v in sorted(data_dict.items()))
-            secret_key = hashlib.sha256(BOT_TOKEN.encode()).digest()
+            secret_key = hashlib.sha256(settings.BOT_TOKEN.encode()).digest()
             hmac_hash = hmac.new(secret_key, check_string.encode(), hashlib.sha256).hexdigest()
             
             if hmac_hash != hash_from_telegram:
+                print(f"Hash mismatch. Expected: {hmac_hash}, Got: {hash_from_telegram}")
+                print(f"Check string: {check_string}")
                 return Response({
                     "auth": False, 
                     "token": "", 
@@ -89,7 +97,7 @@ class TelegramAuthView(APIView):
                     "error": "user data is missing"
                 }, status=400)
             
-            # БЕЗОПАСНЫЙ парсинг JSON вместо eval()
+            # Парсинг JSON
             try:
                 user_data = json.loads(user_data_str)
             except json.JSONDecodeError:
