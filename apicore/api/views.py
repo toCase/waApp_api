@@ -55,18 +55,24 @@ class TelegramAuthView(APIView):
                     "error": "initData is required"
                 }, status=400)
 
-            # Парсим данные от Telegram - НЕ декодируем URL-кодированные символы
-            params = init_data.split('&')
-            data_dict = {}
-            hash_from_telegram = None
+            # Извлекаем hash из строки initData
+            if 'hash=' not in init_data:
+                return Response({
+                    "auth": False, 
+                    "token": "", 
+                    "error": "hash is missing"
+                }, status=400)
 
-            for param in params:
-                if '=' in param:
-                    key, value = param.split('=', 1)
-                    if key == 'hash':
-                        hash_from_telegram = value
-                    elif key != 'signature':  # исключаем signature
-                        data_dict[key] = value
+            # Находим hash и удаляем его из строки
+            parts = init_data.split('&')
+            hash_from_telegram = None
+            filtered_parts = []
+
+            for part in parts:
+                if part.startswith('hash='):
+                    hash_from_telegram = part[5:]  # убираем 'hash='
+                elif not part.startswith('signature='):  # исключаем signature
+                    filtered_parts.append(part)
 
             if not hash_from_telegram:
                 return Response({
@@ -82,8 +88,9 @@ class TelegramAuthView(APIView):
                     "error": "BOT_TOKEN not configured on server"
                 }, status=500)
 
-            # Формируем check_string с сохранением URL-кодирования
-            check_string = "&".join([f"{k}={v}" for k, v in sorted(data_dict.items())])
+            # Сортируем параметры по ключу и формируем check_string
+            sorted_parts = sorted(filtered_parts)
+            check_string = "&".join(sorted_parts)
             print(f"Check string for hash: {repr(check_string)}", f"BOT Token: {settings.BOT_TOKEN}")
 
             secret_key = hmac.new(b"WebAppData", settings.BOT_TOKEN.encode(), hashlib.sha256).digest()
@@ -98,55 +105,59 @@ class TelegramAuthView(APIView):
                     "error": "Invalid signature"
                 }, status=403)
             
-            # Получаем данные пользователя
-            user_data_str = data_dict.get("user", "")
-            if not user_data_str:
-                return Response({
-                    "auth": False, 
-                    "token": "", 
-                    "error": "user data is missing"
-                }, status=400)
-            
-            # Парсинг JSON
-            try:
-                user_data = json.loads(user_data_str)
-            except json.JSONDecodeError:
-                return Response({
-                    "auth": False, 
-                    "token": "", 
-                    "error": "Invalid user data format"
-                }, status=400)
-            
-            telegram_id = user_data.get("id")
-            username = user_data.get("username", f"user_{telegram_id}")
-            first_name = user_data.get("first_name", username)
-            
-            if not telegram_id:
-                return Response({
-                    "auth": False, 
-                    "token": "", 
-                    "error": "telegram id is missing"
-                }, status=400)
-            
-            # Создаем или получаем пользователя
-            user, created = User.objects.get_or_create(
-                username=str(telegram_id),
-                defaults={
-                    "first_name": first_name,
-                    "is_active": True
-                }
-            )
-            
-            # Создаем или получаем токен
-            token, token_created = Token.objects.get_or_create(user=user)
-            
             return Response({
-                "auth": True, 
-                "token": token.key,
-                "user_id": user.id,
-                "username": user.username,
-                "created": created
+                "auth": True
             }, status=200)
+            
+            # Получаем данные пользователя
+            # user_data_str = data_dict.get("user", "")
+            # if not user_data_str:
+            #     return Response({
+            #         "auth": False, 
+            #         "token": "", 
+            #         "error": "user data is missing"
+            #     }, status=400)
+            
+            # # Парсинг JSON
+            # try:
+            #     user_data = json.loads(user_data_str)
+            # except json.JSONDecodeError:
+            #     return Response({
+            #         "auth": False, 
+            #         "token": "", 
+            #         "error": "Invalid user data format"
+            #     }, status=400)
+            
+            # telegram_id = user_data.get("id")
+            # username = user_data.get("username", f"user_{telegram_id}")
+            # first_name = user_data.get("first_name", username)
+            
+            # if not telegram_id:
+            #     return Response({
+            #         "auth": False, 
+            #         "token": "", 
+            #         "error": "telegram id is missing"
+            #     }, status=400)
+            
+            # # Создаем или получаем пользователя
+            # user, created = User.objects.get_or_create(
+            #     username=str(telegram_id),
+            #     defaults={
+            #         "first_name": first_name,
+            #         "is_active": True
+            #     }
+            # )
+            
+            # # Создаем или получаем токен
+            # token, token_created = Token.objects.get_or_create(user=user)
+            
+            # return Response({
+            #     "auth": True, 
+            #     "token": token.key,
+            #     "user_id": user.id,
+            #     "username": user.username,
+            #     "created": created
+            # }, status=200)
             
         except Exception as e:
             print(f"Error in TelegramAuthView: {str(e)}")
