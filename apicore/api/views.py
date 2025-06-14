@@ -55,24 +55,9 @@ class TelegramAuthView(APIView):
                     "error": "initData is required"
                 }, status=400)
 
-            # Извлекаем hash из строки initData
-            if 'hash=' not in init_data:
-                return Response({
-                    "auth": False, 
-                    "token": "", 
-                    "error": "hash is missing"
-                }, status=400)
-
-            # Находим hash и удаляем его из строки
-            parts = init_data.split('&')
-            hash_from_telegram = None
-            filtered_parts = []
-
-            for part in parts:
-                if part.startswith('hash='):
-                    hash_from_telegram = part[5:]  # убираем 'hash='
-                elif not part.startswith('signature='):  # исключаем signature
-                    filtered_parts.append(part)
+            # Парсим данные от Telegram
+            data_dict = dict(parse_qsl(init_data, keep_blank_values=True))
+            hash_from_telegram = data_dict.pop("hash", None)
 
             if not hash_from_telegram:
                 return Response({
@@ -88,13 +73,13 @@ class TelegramAuthView(APIView):
                     "error": "BOT_TOKEN not configured on server"
                 }, status=500)
 
-            # Сортируем параметры по ключу и формируем check_string
-            sorted_parts = sorted(filtered_parts)
-            check_string = "&".join(sorted_parts)
-            print(f"Check string for hash: {repr(check_string)}", f"BOT Token: {settings.BOT_TOKEN}")
+            # Формируем check_string по официальной документации Telegram
+            # Сортируем по ключам и соединяем через \n
+            check_string = "\n".join([f"{k}={v}" for k, v in sorted(data_dict.items())])
+            print(f"Check string for hash: {repr(check_string)}")
 
-            # Попробуем альтернативный способ создания секретного ключа
-            secret_key = hashlib.sha256(settings.BOT_TOKEN.encode()).digest()
+            # Создаем секретный ключ согласно документации
+            secret_key = hmac.new(b"WebAppData", settings.BOT_TOKEN.encode(), hashlib.sha256).digest()
             hmac_hash = hmac.new(secret_key, check_string.encode(), hashlib.sha256).hexdigest()
 
             if hmac_hash != hash_from_telegram:
