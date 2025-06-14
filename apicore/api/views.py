@@ -78,8 +78,12 @@ class TelegramAuthView(APIView):
             # Проверяем подпись
             check_string = "\n".join([f"{k}={v}" for k, v in sorted(data_dict.items())])
             print(f"Check string for hash: {repr(check_string)}")
-            secret_key = hmac.new(b"WebAppData", settings.BOT_TOKEN.encode(), hashlib.sha256).digest()
+            # secret_key = hmac.new(b"WebAppData", settings.BOT_TOKEN.encode(), hashlib.sha256).digest()
+            # hmac_hash = hmac.new(secret_key, check_string.encode(), hashlib.sha256).hexdigest()
+            
+            secret_key = hashlib.sha256(settings.BOT_TOKEN.encode()).digest()
             hmac_hash = hmac.new(secret_key, check_string.encode(), hashlib.sha256).hexdigest()
+
             
             if hmac_hash != hash_from_telegram:
                 print(f"Hash mismatch. Expected: {hmac_hash}, Got: {hash_from_telegram}")
