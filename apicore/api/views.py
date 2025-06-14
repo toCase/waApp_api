@@ -91,59 +91,59 @@ class TelegramAuthView(APIView):
                     "error": "Invalid signature"
                 }, status=403)
             
-            return Response({
-                "auth": True
-            }, status=200)
-            
-            # Получаем данные пользователя
-            # user_data_str = data_dict.get("user", "")
-            # if not user_data_str:
-            #     return Response({
-            #         "auth": False, 
-            #         "token": "", 
-            #         "error": "user data is missing"
-            #     }, status=400)
-            
-            # # Парсинг JSON
-            # try:
-            #     user_data = json.loads(user_data_str)
-            # except json.JSONDecodeError:
-            #     return Response({
-            #         "auth": False, 
-            #         "token": "", 
-            #         "error": "Invalid user data format"
-            #     }, status=400)
-            
-            # telegram_id = user_data.get("id")
-            # username = user_data.get("username", f"user_{telegram_id}")
-            # first_name = user_data.get("first_name", username)
-            
-            # if not telegram_id:
-            #     return Response({
-            #         "auth": False, 
-            #         "token": "", 
-            #         "error": "telegram id is missing"
-            #     }, status=400)
-            
-            # # Создаем или получаем пользователя
-            # user, created = User.objects.get_or_create(
-            #     username=str(telegram_id),
-            #     defaults={
-            #         "first_name": first_name,
-            #         "is_active": True
-            #     }
-            # )
-            
-            # # Создаем или получаем токен
-            # token, token_created = Token.objects.get_or_create(user=user)
-            
             # return Response({
-            #     "auth": True, 
-            #     "token": token.key,
-            #     "user_id": user.id,
-            #     "username": user.username,
-            #     "created": created
+            #     "auth": True
             # }, status=200)
+            print(f"Check is OK")
+            # Получаем данные пользователя
+            user_data_str = data_dict.get("user", "")
+            if not user_data_str:
+                return Response({
+                    "auth": False, 
+                    "token": "", 
+                    "error": "user data is missing"
+                }, status=400)
+            
+            # Парсинг JSON
+            try:
+                user_data = json.loads(user_data_str)
+            except json.JSONDecodeError:
+                return Response({
+                    "auth": False, 
+                    "token": "", 
+                    "error": "Invalid user data format"
+                }, status=400)
+            
+            telegram_id = user_data.get("id")
+            username = user_data.get("username", f"user_{telegram_id}")
+            first_name = user_data.get("first_name", username)
+            
+            if not telegram_id:
+                return Response({
+                    "auth": False, 
+                    "token": "", 
+                    "error": "telegram id is missing"
+                }, status=400)
+            
+            # Создаем или получаем пользователя
+            user, created = User.objects.get_or_create(
+                username=str(telegram_id),
+                defaults={
+                    "first_name": first_name,
+                    "is_active": True
+                }
+            )
+            
+            # Создаем или получаем токен
+            token, token_created = Token.objects.get_or_create(user=user)
+            
+            return Response({
+                "auth": True, 
+                "token": token.key,
+                "user_id": user.id,
+                "username": user.username,
+                "created": created
+            }, status=200)
             
         except Exception as e:
             print(f"Error in TelegramAuthView: {str(e)}")
