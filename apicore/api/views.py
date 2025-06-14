@@ -47,46 +47,67 @@ class TelegramAuthView(APIView):
             print(f"Request headers: {dict(request.headers)}")
             print(f"Request data: {request.data}")
             
-            init_data = request.data.get("initData", "")
-            if not init_data:
-                return Response({
-                    "auth": False, 
-                    "token": "", 
-                    "error": "initData is required"
-                }, status=400)
+            # init_data = request.data.get("initData", "")
+            # if not init_data:
+            #     return Response({
+            #         "auth": False, 
+            #         "token": "", 
+            #         "error": "initData is required"
+            #     }, status=400)
             
-            # Парсим данные от Telegram
-            data_dict = dict(parse_qsl(init_data, keep_blank_values=True))
-            hash_from_telegram = data_dict.pop("hash", None)
-            data_dict.pop("signature", None)
+            # # Парсим данные от Telegram
+            # data_dict = dict(parse_qsl(init_data, keep_blank_values=True))
+            # hash_from_telegram = data_dict.pop("hash", None)
+            # data_dict.pop("signature", None)
             
-            if not hash_from_telegram:
-                return Response({
-                    "auth": False, 
-                    "token": "", 
-                    "error": "hash is missing"
-                }, status=400)
+            # if not hash_from_telegram:
+            #     return Response({
+            #         "auth": False, 
+            #         "token": "", 
+            #         "error": "hash is missing"
+            #     }, status=400)
             
-            # ИСПРАВЛЕНО: Используем BOT_TOKEN из settings
-            if not hasattr(settings, 'BOT_TOKEN'):
-                return Response({
-                    "auth": False, 
-                    "token": "", 
-                    "error": "BOT_TOKEN not configured on server"
-                }, status=500)
+            # # ИСПРАВЛЕНО: Используем BOT_TOKEN из settings
+            # if not hasattr(settings, 'BOT_TOKEN'):
+            #     return Response({
+            #         "auth": False, 
+            #         "token": "", 
+            #         "error": "BOT_TOKEN not configured on server"
+            #     }, status=500)
             
-            # Проверяем подпись
-            check_string = "\n".join([f"{k}={v}" for k, v in sorted(data_dict.items())])
-            print(f"Check string for hash: {repr(check_string)}")
+            # # Проверяем подпись
+            # check_string = "\n".join([f"{k}={v}" for k, v in sorted(data_dict.items())])
+            # print(f"Check string for hash: {repr(check_string)}", f"BOT Token: {settings.BOT_TOKEN}")
             # secret_key = hmac.new(b"WebAppData", settings.BOT_TOKEN.encode(), hashlib.sha256).digest()
             # hmac_hash = hmac.new(secret_key, check_string.encode(), hashlib.sha256).hexdigest()
             
-            secret_key = hashlib.sha256(settings.BOT_TOKEN.encode()).digest()
-            hmac_hash = hmac.new(secret_key, check_string.encode(), hashlib.sha256).hexdigest()
-
+            # # secret_key = hashlib.sha256(settings.BOT_TOKEN.encode()).digest()
+            # # hmac_hash = hmac.new(secret_key, check_string.encode(), hashlib.sha256).hexdigest()
             
-            if hmac_hash != hash_from_telegram:
-                print(f"Hash mismatch. Expected: {hmac_hash}, Got: {hash_from_telegram}")
+            data_dict = dict(parse_qsl(request.data.get("initData", ""), keep_blank_values=True))
+
+            # Вытаскиваем hash и удаляем signature (она вообще не нужна)
+            received_hash = data_dict.pop("hash", "")
+            data_dict.pop("signature", None)
+
+            # Строим check_string
+            check_string = "\n".join(f"{k}={v}" for k, v in sorted(data_dict.items()))
+
+            # Строим секретный ключ
+            secret_key = hashlib.sha256(settings.BOT_TOKEN.encode()).digest()
+
+            # Строим HMAC
+            calculated_hash = hmac.new(
+                secret_key,
+                check_string.encode(),
+                hashlib.sha256
+            ).hexdigest()
+
+            result:bool = hmac.compare_digest(calculated_hash, received_hash)
+
+            if result == False:
+            # if hmac_hash != hash_from_telegram:
+                print(f"Hash mismatch. Expected: {calculated_hash}, Got: {received_hash}")
                 print(f"Check string: {check_string}")
                 return Response({
                     "auth": False, 
