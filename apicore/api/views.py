@@ -55,10 +55,18 @@ class TelegramAuthView(APIView):
                     "error": "initData is required"
                 }, status=400)
 
-            # Парсим данные от Telegram
-            data_dict = dict(parse_qsl(init_data, keep_blank_values=True))
-            hash_from_telegram = data_dict.pop("hash", None)
-            data_dict.pop("signature", None)
+            # Парсим данные от Telegram - НЕ декодируем URL-кодированные символы
+            params = init_data.split('&')
+            data_dict = {}
+            hash_from_telegram = None
+
+            for param in params:
+                if '=' in param:
+                    key, value = param.split('=', 1)
+                    if key == 'hash':
+                        hash_from_telegram = value
+                    elif key != 'signature':  # исключаем signature
+                        data_dict[key] = value
 
             if not hash_from_telegram:
                 return Response({
@@ -74,7 +82,7 @@ class TelegramAuthView(APIView):
                     "error": "BOT_TOKEN not configured on server"
                 }, status=500)
 
-            # Проверяем подпись - ИСПРАВЛЕНО: используем & как разделитель
+            # Формируем check_string с сохранением URL-кодирования
             check_string = "&".join([f"{k}={v}" for k, v in sorted(data_dict.items())])
             print(f"Check string for hash: {repr(check_string)}", f"BOT Token: {settings.BOT_TOKEN}")
 
