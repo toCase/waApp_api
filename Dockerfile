@@ -21,6 +21,9 @@ WORKDIR /app/apicore
 # Собираем статические файлы
 RUN python manage.py collectstatic --noinput || true
 
+# Migrate
+RUN python manage.py migrate
+
 EXPOSE 8000
 
 # Исправленная команда для запуска gunicorn
