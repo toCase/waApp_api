@@ -1,22 +1,24 @@
+import hmac
+import hashlib
+import json
+
+from django.conf import settings
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.contrib.auth.models import User
+
 from rest_framework import generics
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.authntication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
-import hmac
-import hashlib
-import json
 from urllib.parse import parse_qsl, unquote
-from django.conf import settings
 from .models import *
 from .serializer import *
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 
-from django.contrib.auth.models import User
-from rest_framework.permissions import AllowAny
 
 class PostApiList(generics.ListCreateAPIView):
     queryset = Post.objects.all()
@@ -143,9 +145,9 @@ class TelegramAuthView(APIView):
                 "token": token.key,
                 "user_id": user.id,
                 "username": user.username,
-                "first-name": user.first_name,
+                "first_name": user.first_name,
                 "last_name": user.last_name,
-                "created": created
+                "is_staff": user.is_staff
             }, status=200)
             
         except Exception as e:
@@ -155,3 +157,21 @@ class TelegramAuthView(APIView):
                 "token": "", 
                 "error": f"Server error: {str(e)}"
             }, status=500)
+            
+class TokenAuthView(APIView):
+    authentication_classes = (TokenAuthentication, )
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request):
+        user = request.user
+        token, token_created = Token.objects.get(user=user)
+
+        return Response({
+            "auth": True,
+            "token": token.key,
+            "user_id": user.id,
+            "username": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "is_staff": user.is_staff
+        }, status=200)

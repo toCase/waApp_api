@@ -9,5 +9,6 @@ urlpatterns = [
     path('v1/auth/', include('djoser.urls')),
     re_path(r'^auth/', include('djoser.urls.authtoken')),
     path('auth/telegram', views.TelegramAuthView.as_view(), name="telegram_auth"),
+    path('auth/user', )
 
 ]
