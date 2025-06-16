@@ -91,9 +91,6 @@ class TelegramAuthView(APIView):
                     "error": "Invalid signature"
                 }, status=403)
             
-            # return Response({
-            #     "auth": True
-            # }, status=200)
             print(f"Check is OK")
             # Получаем данные пользователя
             user_data_str = data_dict.get("user", "")
@@ -113,6 +110,8 @@ class TelegramAuthView(APIView):
                     "token": "", 
                     "error": "Invalid user data format"
                 }, status=400)
+                
+            print(f"User data: {user_data_str}")
             
             telegram_id = user_data.get("id")
             username = user_data.get("username", f"user_{telegram_id}")
