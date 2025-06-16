@@ -114,8 +114,9 @@ class TelegramAuthView(APIView):
             print(f"User data: {user_data_str}")
             
             telegram_id = user_data.get("id")
-            username = user_data.get("username", f"user_{telegram_id}")
+            username = user_data.get("username", "")
             first_name = user_data.get("first_name", username)
+            last_name = user_data.get("last_name", "")
             
             if not telegram_id:
                 return Response({
@@ -126,9 +127,10 @@ class TelegramAuthView(APIView):
             
             # Создаем или получаем пользователя
             user, created = User.objects.get_or_create(
-                username=str(telegram_id),
+                username=f"{telegram_id}_{username}",
                 defaults={
                     "first_name": first_name,
+                    "last_name": last_name,
                     "is_active": True
                 }
             )
@@ -141,6 +143,8 @@ class TelegramAuthView(APIView):
                 "token": token.key,
                 "user_id": user.id,
                 "username": user.username,
+                "first-name": user.first_name,
+                "last_name": user.last_name,
                 "created": created
             }, status=200)
             
