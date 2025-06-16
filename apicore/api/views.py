@@ -164,7 +164,7 @@ class TokenAuthView(APIView):
 
     def get(self, request):
         user = request.user
-        token, token_created = Token.objects.get(user=user)
+        token, _ = Token.objects.get_or_create(user=user)
 
         return Response({
             "auth": True,
