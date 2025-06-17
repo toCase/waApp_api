@@ -148,7 +148,8 @@ class TelegramAuthView(APIView):
                 "username": user.username,
                 "first_name": user.first_name,
                 "last_name": user.last_name,
-                "is_staff": user.is_staff
+                "is_staff": user.is_staff,
+                "is_admin": user.is_superuser
             }, status=200)
             
         except Exception as e:
@@ -174,7 +175,8 @@ class TokenAuthView(APIView):
             "username": user.username,
             "first_name": user.username,
             "last_name": user.last_name,
-            "is_staff": user.is_staff
+            "is_staff": user.is_staff,
+            "is_admin": user.is_superuser
         }, status=200)
 
 class StaffApiList(generics.ListCreateAPIView):
