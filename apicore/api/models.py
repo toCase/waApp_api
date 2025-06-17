@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 # Create your models here.
 class Post(models.Model):
@@ -20,7 +21,7 @@ class Category(models.Model):
         return self.title
 
 class Staff(models.Model):
-    user = models.ForeignKey('User', on_delete=models.PROTECT, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True)
     title = models.CharField(max_length=255)
     position = models.CharField(max_length=255, blank=True)
     link = models.CharField(max_length=255, blank=True)
