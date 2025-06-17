@@ -171,7 +171,7 @@ class TokenAuthView(APIView):
             "token": token.key,
             "user_id": user.id,
             "username": user.username,
-            "first_name": user.first_name,
+            "first_name": user.username,
             "last_name": user.last_name,
             "is_staff": user.is_staff
         }, status=200)
