@@ -23,6 +23,7 @@ RUN python manage.py collectstatic --noinput || true
 
 # Migrate
 RUN python manage.py migrate
+RUN python manage.py makemigrations
 
 EXPOSE 8000
 
