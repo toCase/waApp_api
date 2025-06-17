@@ -3,6 +3,7 @@ import hashlib
 import json
 
 from django.conf import settings
+from django.db.models import Q
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -175,3 +176,9 @@ class TokenAuthView(APIView):
             "last_name": user.last_name,
             "is_staff": user.is_staff
         }, status=200)
+
+class StaffApiList(generics.ListCreateAPIView):
+    queryset = User.objects.filter(Q(is_staff=True))
+    serializer_class = UserSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
