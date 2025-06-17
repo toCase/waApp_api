@@ -180,7 +180,19 @@ class TokenAuthView(APIView):
         }, status=200)
 
 class StaffApiList(generics.ListCreateAPIView):
-    queryset = User.objects.filter(Q(is_staff=True) & Q(is_superuser=False))
+    queryset = Staff.objects.all()
+    serializer_class = UserSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    
+    def perform_create(self, serializer):
+        user = self.request.user
+        user.is_staff = True
+        user.save()
+        serializer.save(user=user)
+
+class UserApiList(generics.ListAPIView):
+    queryset = User.objects.filter(Q(is_staff=False) & Q(is_superuser=False))
     serializer_class = UserSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
