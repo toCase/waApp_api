@@ -178,7 +178,7 @@ class TokenAuthView(APIView):
         }, status=200)
 
 class StaffApiList(generics.ListCreateAPIView):
-    queryset = User.objects.filter(Q(is_staff=True))
+    queryset = User.objects.filter(Q(is_staff=True) & Q(is_superuser=False))
     serializer_class = UserSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)

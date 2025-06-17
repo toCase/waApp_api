@@ -15,5 +15,4 @@ class CategorySerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
-        exclude = ['password', 'last_login', 'email', 'date_joined']
+        fields = ['id', 'username', 'first_name', 'last_name', 'is_staff', 'is_active']
