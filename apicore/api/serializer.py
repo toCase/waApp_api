@@ -18,6 +18,24 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'first_name', 'last_name']
 
 class StaffSerializer(serializers.ModelSerializer):
+    user_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        source='user',
+        write_only=True
+    )
+    user = serializers.StringRelatedField(read_only=True)
+
     class Meta:
         model = Staff
-        fields = '__all__'
+        fields = [
+            'id',
+            'user',
+            'user_id',
+            'title',
+            'position',
+            'link',
+            'bg_color',
+            'fg_color',
+            'description',
+            'is_active',
+        ]
