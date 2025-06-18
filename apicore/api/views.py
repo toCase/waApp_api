@@ -184,7 +184,7 @@ class StaffApiList(generics.ListCreateAPIView):
     serializer_class = UserSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    
+
     def perform_create(self, serializer):
         user = self.request.user
         user.is_staff = True
