@@ -26,8 +26,8 @@ class Staff(models.Model):
     position = models.CharField(max_length=255, blank=True)
     link = models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=True)
-    bg_color = models.CharField(max_length=9)
-    fg_color = models.CharField(max_length=9)
+    bg_color = models.CharField(max_length=9, default="#FFFFFF")
+    fg_color = models.CharField(max_length=9, default="#000000")
     description = models.TextField(blank=True)
 
     def __str__(self):
