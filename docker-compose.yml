@@ -10,11 +10,21 @@ services:
     env_file:
       - .env
     volumes:
-      - .:/app
+      # Монтируем только нужные директории, избегаем полного монтирования кода
       - staticfiles:/app/staticfiles
+      - media:/app/media
+      # Если нужно отладить - раскомментируйте следующую строку
+      # - .:/app
     environment:
-      - DEBUG=True
       - DJANGO_SETTINGS_MODULE=apicore.settings
+    # Добавляем healthcheck
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/admin/login/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 volumes:
   staticfiles:
+  media:
