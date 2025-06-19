@@ -20,24 +20,6 @@ from urllib.parse import parse_qsl, unquote
 from .models import *
 from .serializer import *
 
-
-class PostApiList(generics.ListCreateAPIView):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-
-class PostApiUpdate(generics.UpdateAPIView):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-
-class CategoryApiList(generics.ListCreateAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-    permission_classes = (IsAuthenticated, )
-
-class CategoryApiUpdate(generics.UpdateAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-
 @method_decorator(csrf_exempt, name='dispatch')
 class TelegramAuthView(APIView):
     authentication_classes = []
