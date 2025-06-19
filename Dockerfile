@@ -19,17 +19,16 @@ RUN mkdir -p /app/staticfiles
 WORKDIR /app/apicore
 
 # Собираем статические файлы
-#RUN python manage.py collectstatic --noinput || true
-#
-## Migrate
-#RUN python manage.py makemigrations
-#RUN python manage.py migrate
+RUN python manage.py collectstatic --noinput || true
+
+# Migrate
+RUN python manage.py makemigrations
+RUN python manage.py migrate
 
 EXPOSE 8000
 
-RUN chmod +x /app/entrypoint.sh
-
-ENTRYPOINT ["/app/entrypoint.sh"]
+#RUN chmod +x /app/entrypoint.sh
+#ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Исправленная команда для запуска gunicorn
 CMD ["gunicorn", "apicore.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--access-logfile", "-", "--error-logfile", "-", "--log-level", "debug"]
