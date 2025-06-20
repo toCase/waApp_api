@@ -174,6 +174,12 @@ class StaffApiList(generics.ListCreateAPIView):
             user.save()
         serializer.save(user=user)
 
+class StaffApiUpdate(generics.UpdateAPIView):
+    queryset = Staff.objects.all()
+    serializer_class = StaffSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
 class UserApiList(generics.ListAPIView):
     queryset = User.objects.filter(Q(is_staff=False) & Q(is_superuser=False))
     serializer_class = UserSerializer
