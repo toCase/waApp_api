@@ -185,3 +185,16 @@ class UserApiList(generics.ListAPIView):
     serializer_class = UserSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
+
+class ScheduleApiList(generics.ListCreateAPIView):
+    queryset = ScheduleTemplate.objects().all()
+    serializer_class = ScheduleSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+class ScheduleApiUpdate(generics.UpdateAPIView):
+    queryset = ScheduleTemplate.objects().all()
+    serializer_class = ScheduleSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+

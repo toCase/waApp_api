@@ -29,3 +29,8 @@ class StaffSerializer(serializers.ModelSerializer):
             'description',
             'is_active',
         ]
+
+class ScheduleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ScheduleTemplate
+        fields = '__all__'

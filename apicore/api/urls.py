@@ -9,5 +9,6 @@ urlpatterns = [
     path('v1/staff_list', views.StaffApiList.as_view(), name="staff_list"),
     path('v1/staff/<int:pk>', views.StaffApiUpdate.as_view(), name="staff_update"),
     path('v1/users_list', views.UserApiList.as_view(), name="users_list"),
-
+    path('v1/schedule_template_list', views.ScheduleApiList.as_view(), name="schedule_template_list"),
+    path('v1/schedule_template/<int:pk>', views.ScheduleApiUpdate.as_view(), name="schedule_template_update"),
 ]
