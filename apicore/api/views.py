@@ -198,3 +198,17 @@ class ScheduleApiUpdate(generics.UpdateAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
+class IntervalsApiList(generics.ListCreateAPIView):
+    queryset = TemplateInterval.objects.all()
+    serializer_class = IntervalSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        schedule_id = self.kwargs['schedule_id']
+        return TemplateInterval.objects.filter(Q(schedule_id=schedule_id))
+
+    def perform_create(self, serializer):
+        schedule_id = self.kwargs['schedule_id']
+        serializer.save(schedule_id=schedule_id)
+

@@ -34,3 +34,8 @@ class ScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScheduleTemplate
         fields = '__all__'
+
+class IntervalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TemplateInterval
+        fields = ['start_time', 'end_time', 'slot_size']
