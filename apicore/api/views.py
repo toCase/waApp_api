@@ -187,18 +187,20 @@ class UserApiList(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
 
 class ScheduleApiList(generics.ListCreateAPIView):
+    serializer_class = ScheduleSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    
+    def get_queryset(self):
+        return ScheduleTemplate.objects.annotate(intervals_count=Count("intervals"));
+
+class ScheduleApiUpdate(generics.UpdateAPIView):
     queryset = ScheduleTemplate.objects.all()
     serializer_class = ScheduleSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-class ScheduleApiUpdate(generics.UpdateAPIView):
-    serializer_class = ScheduleSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
 
-    def get_queryset(self):
-        return ScheduleTemplate.objects.annotate(intervals_count=Count("intervals"));
 
 class IntervalsApiList(generics.ListCreateAPIView):
     queryset = TemplateInterval.objects.all()
