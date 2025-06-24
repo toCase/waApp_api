@@ -31,6 +31,8 @@ class StaffSerializer(serializers.ModelSerializer):
         ]
 
 class ScheduleSerializer(serializers.ModelSerializer):
+    intervals_count = serializers.IntegerField(read_only=True)
+    
     class Meta:
         model = ScheduleTemplate
         fields = '__all__'
@@ -38,4 +40,4 @@ class ScheduleSerializer(serializers.ModelSerializer):
 class IntervalSerializer(serializers.ModelSerializer):
     class Meta:
         model = TemplateInterval
-        fields = ['start_time', 'end_time', 'slot_size']
+        fields = ['id', 'start_time', 'end_time', 'slot_size']

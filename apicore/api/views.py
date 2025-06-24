@@ -3,7 +3,7 @@ import hashlib
 import json
 
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -193,10 +193,12 @@ class ScheduleApiList(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
 
 class ScheduleApiUpdate(generics.UpdateAPIView):
-    queryset = ScheduleTemplate.objects.all()
     serializer_class = ScheduleSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return ScheduleTemplate.objects.annotate(intervals_count=Count("templateinterval"));
 
 class IntervalsApiList(generics.ListCreateAPIView):
     queryset = TemplateInterval.objects.all()
