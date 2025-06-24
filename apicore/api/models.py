@@ -22,7 +22,7 @@ class ScheduleTemplate(models.Model):
         return self.title
 
 class TemplateInterval(models.Model):
-    schedule = models.ForeignKey(ScheduleTemplate, on_delete=models.CASCADE)
+    schedule = models.ForeignKey(ScheduleTemplate, on_delete=models.CASCADE, related_name="intervals")
     start_time = models.TimeField()
     end_time = models.TimeField()
     slot_size = models.PositiveSmallIntegerField()

@@ -198,7 +198,7 @@ class ScheduleApiUpdate(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return ScheduleTemplate.objects.annotate(intervals_count=Count("templateinterval"));
+        return ScheduleTemplate.objects.annotate(intervals_count=Count("intervals"));
 
 class IntervalsApiList(generics.ListCreateAPIView):
     queryset = TemplateInterval.objects.all()
