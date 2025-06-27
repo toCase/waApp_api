@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
 
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -190,7 +190,7 @@ class ScheduleApiList(generics.ListCreateAPIView):
     serializer_class = ScheduleSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    
+
     def get_queryset(self):
         return ScheduleTemplate.objects.annotate(intervals_count=Count("intervals"));
 
@@ -216,3 +216,10 @@ class IntervalsApiList(generics.ListCreateAPIView):
         schedule_id = self.kwargs['schedule_id']
         serializer.save(schedule_id=schedule_id)
 
+class IntervalsRemove(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def delete(self, request, schedule_id):
+        deleted, _ = TemplateInterval.objects.filter(Q(schedule_id=schedule_id)).delete()
+        return Response({'deleted': deleted}, status=status.HTTP_204_NO_CONTENT)
