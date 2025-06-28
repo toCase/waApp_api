@@ -232,7 +232,7 @@ class ScheduleCalendar(APIView):
 
     def get(self, request):
         year = int(request.query_params.get("year", date.today().year))
-        month = int(request.guery_params.get("month", date.today().month))
+        month = int(request.query_params.get("month", date.today().month))
         start_date = date(year, month, 1)
         end_date = date(year, month, monthrange(year, month)[1])
 
