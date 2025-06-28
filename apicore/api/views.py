@@ -1,6 +1,8 @@
 import hmac
 import hashlib
 import json
+from datetime import date
+from calendar import monthrange
 
 from django.conf import settings
 from django.db.models import Q, Count
@@ -223,3 +225,35 @@ class IntervalsRemove(APIView):
     def delete(self, request, schedule_id):
         deleted, _ = TemplateInterval.objects.filter(Q(schedule_id=schedule_id)).delete()
         return Response({'deleted': deleted}, status=status.HTTP_204_NO_CONTENT)
+
+class ScheduleCalendar(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        year = int(request.query_params.get("year", date.today().year))
+        month = int(request.guery_params.get("month", date.today().month))
+        start_date = date(year, month, 1)
+        end_date = date(year, month, monthrange(year, month)[1])
+
+        slots = (WorkSlot.objects.filter(work_day__range=(start_date, end_date))
+                 .select_related('staff')
+                 .order_by('staff_id', 'work_day')
+                 .values('staff_id', 'staff__title', 'work_day')
+                 .distinct())
+        data = {}
+        for slot in slots:
+            sid = slot['staff_id']
+            if sid not in data:
+                data[sid] = {
+                    'staff' : {
+                        'id':sid,
+                        'name': slot['staff__title'],
+                    },
+                    'days':[],
+                }
+            data[sid]['days'].append(slot['work_day'].day)
+
+        result = list(data.values())
+        serializer = StaffScheduleSerializer(result, many=True)
+        return Response(serializer.data)

@@ -41,3 +41,7 @@ class IntervalSerializer(serializers.ModelSerializer):
     class Meta:
         model = TemplateInterval
         fields = ['id', 'start_time', 'end_time', 'slot_size']
+
+class StaffScheduleSerializer(serializers.Serializer):
+    staff = StaffSerializer()
+    days = serializers.ListField(child=serializers.IntegerField())
