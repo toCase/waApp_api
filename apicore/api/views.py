@@ -5,7 +5,7 @@ from datetime import date
 from calendar import monthrange
 
 from django.conf import settings
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Prefetch
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -236,24 +236,21 @@ class ScheduleCalendar(APIView):
         start_date = date(year, month, 1)
         end_date = date(year, month, monthrange(year, month)[1])
 
-        slots = (WorkSlot.objects.filter(work_day__range=(start_date, end_date))
-                 .select_related('staff')
-                 .order_by('staff_id', 'work_day')
-                 .values('staff_id', 'staff__title', 'work_day')
-                 .distinct())
-        data = {}
-        for slot in slots:
-            sid = slot['staff_id']
-            if sid not in data:
-                data[sid] = {
-                    'staff' : {
-                        'id':sid,
-                        'title': slot['staff__title'],
-                    },
-                    'days':[],
-                }
-            data[sid]['days'].append(slot['work_day'].day)
+        # Фильтрованные слоты
+        slot_qs = WorkSlot.objects.filter(work_day__range=(start_date, end_date))
 
-        result = list(data.values())
+        # Все активные сотрудники с предзагрузкой только нужных слотов
+        staff_qs = Staff.objects.filter(is_active=True).prefetch_related(
+            Prefetch('workslot_set', queryset=slot_qs, to_attr='month_slots')
+        )
+
+        result = []
+        for staff in staff_qs:
+            days = [slot.work_day.day for slot in getattr(staff, 'month_slots', [])]
+            result.append({
+                'staff': staff,
+                'days': days
+            })
+
         serializer = StaffScheduleSerializer(result, many=True)
         return Response(serializer.data)
