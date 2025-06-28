@@ -248,7 +248,7 @@ class ScheduleCalendar(APIView):
                 data[sid] = {
                     'staff' : {
                         'id':sid,
-                        'name': slot['staff__title'],
+                        'title': slot['staff__title'],
                     },
                     'days':[],
                 }
