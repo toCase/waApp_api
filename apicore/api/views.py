@@ -307,3 +307,14 @@ class WorkslotGenerator(APIView):
                         "end": end_time.strftime("%H:%M")
                     })
         return Response({"created": created_slots}, status=status.HTTP_201_CREATED)
+
+class WorkslotRemove(APIView):
+    authentication_classes = (TokenAuthentication, )
+    permission_classes = (IsAuthenticated, )
+
+    def delete(self, request, month:int, year:int, staff_id:int):
+        start_date = date(year, month, 1)
+        end_date = date(year, month, monthrange(year, month)[1])
+
+        deleted, _ = WorkSlot.objects.filter(Q(work_day__range=(start_date, end_date)) & Q(staff_id=staff_id)).delete()
+        return Response({'deleted': deleted}, status=status.HTTP_204_NO_CONTENT)
