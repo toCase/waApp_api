@@ -14,4 +14,5 @@ urlpatterns = [
     path('v1/schedule_template/<int:schedule_id>/intervals', views.IntervalsApiList.as_view(), name="template_intervals"),
     path('v1/template_intervals/<int:schedule_id>/delete', views.IntervalsRemove.as_view(), name="delete_intervals"),
     path('v1/staff_schedule/', views.ScheduleCalendar.as_view(), name="schedule_calendar"),
+    path('v1/workdays_create', views.WorkslotGenerator.as_view(), name="workdays_create"),
 ]

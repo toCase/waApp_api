@@ -1,7 +1,9 @@
 import hmac
 import hashlib
 import json
-from datetime import date
+import math
+
+from datetime import date, datetime, time
 from calendar import monthrange
 
 from django.conf import settings
@@ -254,3 +256,55 @@ class ScheduleCalendar(APIView):
 
         serializer = StaffScheduleSerializer(result, many=True)
         return Response(serializer.data)
+
+class WorkslotGenerator(APIView):
+    authentication_classes = (TokenAuthentication, )
+    permission_classes = (IsAuthenticated, )
+
+    def time_to_minutes(self, t:time):
+        return t.hour * 60 + t.minute
+
+    def minutes_to_time(self, minutes:int):
+        hour = math.floor(minutes / 60)
+        minute = minutes - (hour * 60)
+        return time(hour, minute, 00)
+
+    def post(self, request):
+        staff_id = request.data.get("staff_id")
+        schedule_id = request.data.get("schedule_id")
+        days = request.data.get("days", [])
+
+        staff = Staff.objects.get(id=staff_id)
+        templates = TemplateInterval.objects.filter(Q(schedule_id=schedule_id))
+
+        created_slots = []
+
+        for day in days:
+            day_date = datetime.strptime(day, "%d.%m.%Y")
+
+            for template in templates:
+                template_id = template.id
+                st = self.time_to_minutes(template.start_time)
+                ed = self.time_to_minutes(template.end_time)
+                slot_size = template.slot_size
+
+                while st < ed:
+                    start_time = self.minutes_to_time(st)
+                    end_time = self.minutes_to_time(st + slot_size)
+                    st += slot_size
+
+                    WorkSlot.objects.create(
+                        staff=staff,
+                        work_day=day_date,
+                        start_time=start_time,
+                        end_time=end_time,
+                        template_id=template_id,
+                        is_blocked=False
+                    )
+
+                    created_slots.append({
+                        "day": day,
+                        "start": start_time.strftime("%H: %M"),
+                        "end": end_time.strftime("%H:%M")
+                    })
+        return Response({"created": created_slots}, status=status.HTTP_201_CREATED)
