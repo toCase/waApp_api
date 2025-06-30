@@ -280,7 +280,7 @@ class WorkslotGenerator(APIView):
         created_slots = []
 
         for day in days:
-            day_date = datetime.strptime(day, "%d.%m.%Y")
+            day_date = datetime.fromisoformat(day)
 
             for template in templates:
                 template_id = template.id
