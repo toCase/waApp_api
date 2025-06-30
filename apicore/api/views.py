@@ -298,7 +298,6 @@ class WorkslotGenerator(APIView):
                         work_day=day_date,
                         start_time=start_time,
                         end_time=end_time,
-                        template_id=template_id,
                         is_blocked=False
                     )
 
