@@ -277,13 +277,22 @@ class WorkslotGenerator(APIView):
         staff = Staff.objects.get(id=staff_id)
         templates = TemplateInterval.objects.filter(Q(schedule_id=schedule_id))
 
+        # clear old
+        try:
+            date_list = [datetime.fromisoformat(d).date() for d in days]
+        except ValueError as e:
+            return Response({"error": f"Invalid date format: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        deleted, _ = WorkSlot.objects.filter(
+            staff_id=staff_id,
+            work_day__in=date_list
+        ).delete()
+
+        #  make new
         created_slots = []
 
-        for day in days:
-            day_date = datetime.fromisoformat(day)
-
+        for day in date_list:
             for template in templates:
-                template_id = template.id
                 st = self.time_to_minutes(template.start_time)
                 ed = self.time_to_minutes(template.end_time)
                 slot_size = template.slot_size
@@ -295,7 +304,7 @@ class WorkslotGenerator(APIView):
 
                     WorkSlot.objects.create(
                         staff=staff,
-                        work_day=day_date,
+                        work_day=day,
                         start_time=start_time,
                         end_time=end_time,
                         is_blocked=False
@@ -307,6 +316,27 @@ class WorkslotGenerator(APIView):
                         "end": end_time.strftime("%H:%M")
                     })
         return Response({"created": created_slots}, status=status.HTTP_201_CREATED)
+
+class WorkslotRemoveDays(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        staff_id = request.data.get("staff_id")
+        days = request.data.get("days", [])
+
+        try:
+            date_list = [datetime.fromisoformat(d).date() for d in days]
+        except ValueError as e:
+            return Response({"error": f"Invalid date format: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        deleted, _ = WorkSlot.objects.filter(
+            staff_id=staff_id,
+            work_day__in=date_list
+        ).delete()
+
+        return Response({"deleted": deleted}, status=status.HTTP_204_NO_CONTENT)
+
 
 class WorkslotRemove(APIView):
     authentication_classes = (TokenAuthentication, )
