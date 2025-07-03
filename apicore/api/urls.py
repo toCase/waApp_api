@@ -1,5 +1,6 @@
 from django.urls import path, include, re_path
 from . import views
+from .views import WorkdayStaff
 
 urlpatterns = [
     path('v1/auth/', include('djoser.urls')),
@@ -17,4 +18,5 @@ urlpatterns = [
     path('v1/workdays_create', views.WorkslotGenerator.as_view(), name="workdays_create"),
     path('v1/workdays_delete_days', views.WorkslotRemoveDays.as_view(), name="workdays_delete_days"),
     path('v1/workdays_delete/<int:month>/<int:year>/<int:staff_id>', views.WorkslotRemove.as_view(), name="workdays_delete"),
+    path('v1/workday_staff/', views.WorkdayStaff.as_view(), name="workdays_staff"),
 ]

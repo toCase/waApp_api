@@ -42,10 +42,21 @@ class WorkSlot(models.Model):
         related_name="blocked_slots"
     )
 
+class Clients(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True)
+    name = models.CharField(max_length=255)
+    is_remind = models.BooleanField(default=False)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
 class Appointment(models.Model):
     slot = models.OneToOneField(WorkSlot, on_delete=models.CASCADE, related_name="appointment")
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True)
+    client = models.ForeignKey(Clients, on_delete=models.PROTECT, null=True)
     notes = models.TextField(blank=True)
     status = models.PositiveSmallIntegerField(default=0)
     rating = models.PositiveSmallIntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+

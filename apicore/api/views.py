@@ -204,8 +204,6 @@ class ScheduleApiUpdate(generics.UpdateAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-
-
 class IntervalsApiList(generics.ListCreateAPIView):
     queryset = TemplateInterval.objects.all()
     serializer_class = IntervalSerializer
@@ -337,7 +335,6 @@ class WorkslotRemoveDays(APIView):
 
         return Response({"deleted": deleted}, status=status.HTTP_204_NO_CONTENT)
 
-
 class WorkslotRemove(APIView):
     authentication_classes = (TokenAuthentication, )
     permission_classes = (IsAuthenticated, )
@@ -348,3 +345,21 @@ class WorkslotRemove(APIView):
 
         deleted, _ = WorkSlot.objects.filter(Q(work_day__range=(start_date, end_date)) & Q(staff_id=staff_id)).delete()
         return Response({'deleted': deleted}, status=status.HTTP_204_NO_CONTENT)
+
+class WorkdayStaff(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        date_str = request.query_params.get("date")
+        if not date_str:
+            return Response({"error":"Missing date"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            work_day = date.fromisoformat(date_str)
+        except ValueError:
+            return Response(data={"error":"Invalid date format"}, status=status.HTTP_400_BAD_REQUEST)
+
+        staff_ids = (WorkSlot.objects.filter(work_day=work_day, staff__isnull=False)
+                     .values_list('staff_id', flat=True)
+                     .distinct())
+        return Response(data={'staff_ids':list(staff_ids)}, status=status.HTTP_200_OK)
