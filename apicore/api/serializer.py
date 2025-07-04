@@ -61,6 +61,7 @@ class WorkslotListSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkSlot
         fields = [
+            'id',
             'start_time',
             'end_time',
             'is_blocked',
