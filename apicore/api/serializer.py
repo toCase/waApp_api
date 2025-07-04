@@ -49,3 +49,47 @@ class StaffShortSerializer(serializers.Serializer):
 class StaffScheduleSerializer(serializers.Serializer):
     staff = StaffShortSerializer()
     days = serializers.ListField(child=serializers.IntegerField())
+
+class WorkslotListSerializer(serializers.ModelSerializer):
+    appointment_id = serializers.SerializerMethodField()
+    client_id = serializers.SerializerMethodField()
+    client_name = serializers.SerializerMethodField()
+    appointment_note  = serializers.SerializerMethodField()
+    appointment_status = serializers.SerializerMethodField()
+    appointment_rating = serializers.SerializerMethodField()
+
+    class Meta:
+        model = WorkSlot
+        fields = [
+            'start_time',
+            'end_time',
+            'is_blocked',
+            'appointment_id',
+            'client_id',
+            'client_name',
+            'appointment_note',
+            'appointment_status',
+            'appointment_rating'
+        ]
+
+    def get_appointment_id(self, obj):
+        return obj.appointment.id if hasattr(obj, 'appointment') else None
+
+    def get_client_id(self, obj):
+        if hasattr(obj, 'appointment') and obj.appointment.client:
+            return obj.appointment.client.id
+        return None
+
+    def get_client_name(self, obj):
+        if hasattr(obj, 'appointment') and obj.appointment.client:
+            return obj.appointment.client.name
+        return None
+
+    def get_appointment_note(self, obj):
+        return obj.appointment.notes if hasattr(obj, 'appointment') else None
+
+    def get_appointment_status(self, obj):
+        return obj.appointment.status if hasattr(obj, 'appointment') else None
+
+    def get_appointment_rating(self, obj):
+        return obj.appointment.rating if hasattr(obj, 'appointment') else None

@@ -363,3 +363,40 @@ class WorkdayStaff(APIView):
                      .values_list('staff_id', flat=True)
                      .distinct())
         return Response(data={'staff_ids':list(staff_ids)}, status=status.HTTP_200_OK)
+
+class WorkslotAppointemnt(generics.ListAPIView):
+    serializer_class = WorkslotListSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        staff_id = self.request.query_params.get("staff")
+        work_day = self.request.query_params.get("workday")
+
+        if not staff_id or not work_day:
+            return WorkSlot.objects.none()
+
+        queryset = (WorkSlot.objects.filter(Q(staff_id=staff_id) & Q(work_day=work_day))
+                    .select_related('appointment','appointment__client')
+                    .order_by("start_time"))
+
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        staff_id = request.query_params.get("staff")
+        work_day = request.query_params.get("workday")
+
+        if not staff_id:
+            return Response(
+                {'error': 'staff_id parameter is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not work_day:
+            return Response(
+                {'error': 'work_day parameter is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return super().list(request, *args, **kwargs)
+
