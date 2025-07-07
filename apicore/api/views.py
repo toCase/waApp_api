@@ -5,6 +5,7 @@ import math
 
 from datetime import date, datetime, time
 from calendar import monthrange
+from email.policy import default
 
 from django.conf import settings
 from django.db.models import Q, Count, Prefetch
@@ -173,6 +174,53 @@ class TokenAuthView(APIView):
             "is_staff": user.is_staff,
             "is_admin": user.is_superuser
         }, status=200)
+
+class LoginAuthView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        first_name = request.data.get('username')
+        email = request.data.get('email')
+
+        if not username or not password:
+            return Response({"error": "username and password required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if User.objects.filter(username=username).exists():
+            return Response({"error": "username already taken"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            extra_fields={
+                'first_name':first_name
+            }
+        )
+
+        client, _ = Clients.objects.create(
+            user=user,
+            defaults={
+                'name': f'{first_name}',
+                'description': ''
+            }
+        )
+
+        token, _ =Token.objects.get_or_create(user=user)
+
+        return Response({
+            "auth": True,
+            "token": token.key,
+            "user_id": user.id,
+            "client_id": client.id,
+            "username": user.username,
+            "first_name": user.username,
+            "last_name": user.last_name,
+            "is_staff": user.is_staff,
+            "is_admin": user.is_superuser
+        }, status=status.HTTP_200_OK)
+
 
 class StaffApiList(generics.ListCreateAPIView):
     queryset = Staff.objects.all()
