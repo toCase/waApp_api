@@ -94,3 +94,10 @@ class WorkslotListSerializer(serializers.ModelSerializer):
 
     def get_appointment_rating(self, obj):
         return obj.appointment.rating if hasattr(obj, 'appointment') else None
+
+class ClientListSerializer(serializers.ModelSerializer):
+    appointment_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Clients
+        fields = ['id', 'name', 'is_remind', 'description', 'user_id', 'appointment_count']

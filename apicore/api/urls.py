@@ -21,4 +21,5 @@ urlpatterns = [
     path('v1/workdays_delete/<int:month>/<int:year>/<int:staff_id>', views.WorkslotRemove.as_view(), name="workdays_delete"),
     path('v1/workday_staff/', views.WorkdayStaff.as_view(), name="workdays_staff"),
     path('v1/workslots/', views.WorkslotAppointemnt.as_view(), name="workslot_list"),
+    path('v1/clients', views.ClientsList.as_view(), name="clients"),
 ]

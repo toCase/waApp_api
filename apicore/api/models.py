@@ -54,7 +54,7 @@ class Clients(models.Model):
 
 class Appointment(models.Model):
     slot = models.OneToOneField(WorkSlot, on_delete=models.CASCADE, related_name="appointment")
-    client = models.ForeignKey(Clients, on_delete=models.PROTECT, null=True)
+    client = models.ForeignKey(Clients, on_delete=models.PROTECT, null=True, related_name="meets")
     notes = models.TextField(blank=True)
     status = models.PositiveSmallIntegerField(default=0)
     rating = models.PositiveSmallIntegerField(null=True, blank=True)

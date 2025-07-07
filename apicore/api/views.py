@@ -455,3 +455,10 @@ class WorkslotAppointemnt(generics.ListAPIView):
 
         return super().list(request, *args, **kwargs)
 
+class ClientsList(generics.ListCreateAPIView):
+    serializer_class = ClientListSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return Appointment.objects.annotate(appointment_count=Count("meets"))
