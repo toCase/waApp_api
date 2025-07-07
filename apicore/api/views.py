@@ -194,9 +194,7 @@ class LoginAuthView(APIView):
             username=username,
             email=email,
             password=password,
-            extra_fields={
-                'first_name':first_name
-            }
+            first_name=first_name,
         )
 
         client, _ = Clients.objects.create(
