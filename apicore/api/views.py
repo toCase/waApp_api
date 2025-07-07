@@ -123,7 +123,15 @@ class TelegramAuthView(APIView):
                     "is_active": True
                 }
             )
-            
+
+            # Get or Create - Client
+            client, created = Clients.objects.get_or_create(
+                user=user,
+                defaults= {
+                    'name': f'{first_name} {last_name}',
+                    'description': 'TG'
+                }
+            )
             # Создаем или получаем токен
             token, token_created = Token.objects.get_or_create(user=user)
             
@@ -135,7 +143,8 @@ class TelegramAuthView(APIView):
                 "first_name": user.first_name,
                 "last_name": user.last_name,
                 "is_staff": user.is_staff,
-                "is_admin": user.is_superuser
+                "is_admin": user.is_superuser,
+                "client_id": client.id,
             }, status=200)
             
         except Exception as e:
