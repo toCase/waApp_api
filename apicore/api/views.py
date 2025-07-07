@@ -126,12 +126,10 @@ class TelegramAuthView(APIView):
             )
 
             # Get or Create - Client
-            client, created = Clients.objects.get_or_create(
+            client, _ = Clients.objects.create(
                 user=user,
-                defaults= {
-                    'name': f'{first_name} {last_name}',
-                    'description': 'TG'
-                }
+                name=first_name,
+                description='',
             )
             # Создаем или получаем токен
             token, token_created = Token.objects.get_or_create(user=user)
@@ -199,10 +197,8 @@ class LoginAuthView(APIView):
 
         client, _ = Clients.objects.create(
             user=user,
-            defaults={
-                'name': f'{first_name}',
-                'description': ''
-            }
+            name=first_name,
+            description= '',
         )
 
         token, _ =Token.objects.get_or_create(user=user)
