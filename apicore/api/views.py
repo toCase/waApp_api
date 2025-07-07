@@ -461,4 +461,4 @@ class ClientsList(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return Appointment.objects.annotate(appointment_count=Count("meets"))
+        return Appointment.objects.annotate(appointment_count=Count("appointment"))
