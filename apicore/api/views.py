@@ -523,9 +523,6 @@ class AppointmentView(APIView):
             slot = WorkSlot.objects.get(id=slot_id)
             client = Clients.objects.get(id=client_id)
 
-            if slot.is_blocked:
-                return Response({"error":"Slot is blocked"}, status=status.HTTP_400_BAD_REQUEST)
-
             appointment = Appointment.objects.get(id=appointment_id)
             appointment.client = client
             appointment.notes = notes
