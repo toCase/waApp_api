@@ -62,6 +62,7 @@ class WorkslotListSerializer(serializers.ModelSerializer):
         model = WorkSlot
         fields = [
             'id',
+            'work_day',
             'start_time',
             'end_time',
             'is_blocked',

@@ -462,3 +462,42 @@ class ClientsList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         return Clients.objects.annotate(appointment_count=Count('appointment'))
+
+class AppointmentView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        slot_id = request.data.get("slot_id")
+        client_id = request.data.get("client_id")
+        notes = request.data.get("notes", "")
+
+        if not slot_id:
+            return Response({"error":"Missing slot"}, status=status.HTTP_400_BAD_REQUEST)
+        if not client_id:
+            return Response({"error":"Missing client"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            slot = WorkSlot.objects.get(id=slot_id)
+            client = Clients.objects.get(id=client_id)
+
+            if slot.is_blocked:
+                return Response({"error":"Slot is blocked"}, status=status.HTTP_400_BAD_REQUEST)
+
+            appointment = Appointment.objects.create(
+                slot=slot,
+                client=client,
+                notes=notes,
+                status=0
+            )
+
+            # block workslot
+            slot.is_blocked = True
+            slot.blocked_by = appointment
+            slot.save()
+
+
+        except WorkSlot.DoesNotExist:
+            return Response({"error":"Workslot not found"}, status=status.HTTP_400_BAD_REQUEST)
+        except Clients.DoesNotExist:
+            return Response({"error": "Client not found"}, status=status.HTTP_400_BAD_REQUEST)
