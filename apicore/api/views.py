@@ -541,9 +541,14 @@ class AppointmentView(APIView):
         except Clients.DoesNotExist:
             return Response({"error": "Client not found"}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class AppointmentDelete(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
     def delete(self, request):
-        appointment_id = request.data.get("appointment_id")
-        slot_id = request.data.get("slot_id")
+        appointment_id = request.query_params.get("appointment")
+        slot_id = request.query_params.get("slot")
         try:
             slot = WorkSlot.objects.get(id=slot_id)
             appointment = Appointment.objects.get(id=appointment_id)
