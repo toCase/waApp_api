@@ -495,6 +495,9 @@ class AppointmentView(APIView):
             slot.is_blocked = True
             slot.blocked_by = appointment
             slot.save()
+            serializer = WorkslotListSerializer(slot)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 
         except WorkSlot.DoesNotExist:
