@@ -540,3 +540,25 @@ class AppointmentView(APIView):
             return Response({"error":"Workslot not found"}, status=status.HTTP_400_BAD_REQUEST)
         except Clients.DoesNotExist:
             return Response({"error": "Client not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request):
+        appointment_id = request.data.get("appointment_id")
+        slot_id = request.data.get("slot_id")
+        try:
+            slot = WorkSlot.objects.get(id=slot_id)
+            appointment = Appointment.objects.get(id=appointment_id)
+
+            slot.is_blocked = False
+            slot.blocked_by = None
+            slot.save()
+
+            appointment.delete()
+
+            serializer = WorkslotListSerializer(slot)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Appointment.DoesNotExist:
+            return Response({"error":"Appointment not found"}, status=status.HTTP_400_BAD_REQUEST)
+        except WorkSlot.DoesNotExist:
+            return Response({"error":"Workslot not found"}, status=status.HTTP_400_BAD_REQUEST)
+
